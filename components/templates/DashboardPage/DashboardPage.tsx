@@ -1,12 +1,15 @@
 import { getBestsellersOrNewPartsFx } from '@/app/api/boilerParts'
-import BrandSlider from '@/components/modules/DashboardPage/BrandsSlider'
 import DashboardSlider from '@/components/modules/DashboardPage/DashboardSlider'
 import { $mode } from '@/context/mode'
-import styles from '@/styles/dashboard/index.module.scss'
+import { $shoppingCart } from '@/context/shopping-cart'
 import { IBoilerParts } from '@/types/boilerParts'
 import { useStore } from 'effector-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import { AnimatePresence, motion } from 'framer-motion'
+import CartAlert from '@/components/modules/DashboardPage/CartAlert'
+import BrandsSlider from '@/components/modules/DashboardPage/BrandsSlider'
+import styles from '@/styles/dashboard/index.module.scss'
 
 const DashboardPage = () => {
   const [newParts, setNewParts] = useState<IBoilerParts>({} as IBoilerParts)
@@ -14,12 +17,23 @@ const DashboardPage = () => {
     {} as IBoilerParts
   )
   const [spinner, setSpinner] = useState(false)
+  const shoppingCart = useStore($shoppingCart)
+  const [showAlert, setShowAlert] = useState(!!shoppingCart.length)
   const mode = useStore($mode)
   const darkModeClass = mode === 'dark' ? `${styles.dark_mode}` : ''
 
   useEffect(() => {
     loadBoilerParts()
   }, [])
+
+  useEffect(() => {
+    if (shoppingCart.length) {
+      setShowAlert(true)
+      return
+    }
+
+    setShowAlert(false)
+  }, [shoppingCart.length])
 
   const loadBoilerParts = async () => {
     try {
@@ -37,11 +51,32 @@ const DashboardPage = () => {
       setSpinner(false)
     }
   }
+
+  const closeAlert = () => setShowAlert(false)
+
   return (
     <section className={styles.dashboard}>
       <div className={`container ${styles.dashboard__container}`}>
+        <AnimatePresence>
+          {showAlert && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={`${styles.dashboard__alert} ${darkModeClass}`}
+            >
+              <CartAlert
+                count={shoppingCart.reduce(
+                  (defaultCount, item) => defaultCount + item.count,
+                  0
+                )}
+                closeAlert={closeAlert}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div className={styles.dashboard__brands}>
-          <BrandSlider />
+          <BrandsSlider />
         </div>
         <h2 className={`${styles.dashboard__title} ${darkModeClass}`}>
           Детали для газовых котлов
@@ -70,7 +105,7 @@ const DashboardPage = () => {
             газового оборудования. Купить запчасть, деталь для ремонта газового
             котла возможно в любом населенном пункте Российской Федерации:
             Осуществляем доставку запчасти к газовым котлам в следующие города:
-            Москва, Санкт-Петербург, Новосибирск, Екатеринбург.
+            Москва, Санкт-Петербург и т.д
           </p>
         </div>
       </div>
