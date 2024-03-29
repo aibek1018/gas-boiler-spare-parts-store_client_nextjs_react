@@ -4,7 +4,6 @@ import styles from '@/styles/cityButton/index.module.scss'
 import { $mode } from '@/context/mode'
 
 const CityButton = () => {
-  console.log('sdas')
   const mode = useStore($mode)
   const darkModeClass = mode === 'dark' ? `${styles.dark_mode}` : ''
   return (
