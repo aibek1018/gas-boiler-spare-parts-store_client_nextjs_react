@@ -1,22 +1,27 @@
 /* eslint-disable @next/next/no-img-element */
+import { useStore } from 'effector-react'
+import Link from 'next/link'
 import { $mode } from '@/context/mode'
 import { IBoilerPart } from '@/types/boilerparts'
-import { useStore } from 'effector-react'
-import { useState } from 'react'
-import styles from '@/styles/catalog/index.module.scss'
-import spinnerStyles from '@/styles/spinner/index.module.scss'
-import Link from 'next/link'
 import { formatPrice } from '@/utils/common'
 import { $shoppingCart } from '@/context/shopping-cart'
 import CartHoverCheckedSvg from '@/components/elements/CartHoverCheckedSvg/CartHoverCheckedSvg'
 import CartHoverSvg from '@/components/elements/CartHoverSvg/CartHoverSvg'
+import spinnerStyles from '@/styles/spinner/index.module.scss'
+import { toggleCartItem } from '@/utils/shopping-cart'
+import { $user } from '@/context/user'
+import { removeFromCartFx } from '@/app/api/shopping-cart'
+import styles from '@/styles/catalog/index.module.scss'
 
 const CatalogItem = ({ item }: { item: IBoilerPart }) => {
   const mode = useStore($mode)
+  const user = useStore($user)
   const shoppingCart = useStore($shoppingCart)
   const isInCart = shoppingCart.some((cartItem) => cartItem.partId === item.id)
+  const spinner = useStore(removeFromCartFx.pending)
   const darkModeClass = mode === 'dark' ? `${styles.dark_mode}` : ''
-  const [spinner, setSpinner] = useState(false)
+
+  const toggleToCart = () => toggleCartItem(user.username, item.id, isInCart)
 
   return (
     <li className={`${styles.catalog__list__item} ${darkModeClass}`}>
@@ -28,7 +33,6 @@ const CatalogItem = ({ item }: { item: IBoilerPart }) => {
         <span className={styles.catalog__list__item__code}>
           Артикул: {item.vendor_code}
         </span>
-
         <span className={styles.catalog__list__item__price}>
           {formatPrice(item.price)} P
         </span>
@@ -38,6 +42,7 @@ const CatalogItem = ({ item }: { item: IBoilerPart }) => {
           isInCart ? styles.added : ''
         }`}
         disabled={spinner}
+        onClick={toggleToCart}
       >
         {spinner ? (
           <div className={spinnerStyles.spinner} style={{ top: 6, left: 6 }} />
