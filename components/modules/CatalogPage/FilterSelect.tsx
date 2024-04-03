@@ -1,10 +1,7 @@
 /* eslint-disable indent */
-import {
-  $boilerParts,
-  setBoilerPartsByPopularity,
-  setBoilerPartsCheapFirst,
-  setBoilerPartsExpensiveFirst,
-} from '@/context/boilerParts'
+import { useStore } from 'effector-react'
+import { useEffect, useState } from 'react'
+import Select from 'react-select'
 import { $mode } from '@/context/mode'
 import {
   controlStyles,
@@ -15,12 +12,19 @@ import { optionStyles } from '@/styles/searchInput'
 import { IOption, SelectOptionType } from '@/types/common'
 import { createSelectOption } from '@/utils/common'
 import { categoriesOptions } from '@/utils/selectContents'
-import { useStore } from 'effector-react'
+import {
+  $boilerParts,
+  setBoilerPartsByPopularity,
+  setBoilerPartsCheapFirst,
+  setBoilerPartsExpensiveFirst,
+} from '@/context/boilerParts'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import Select from 'react-select'
 
-const FilterSelect = () => {
+const FilterSelect = ({
+  setSpinner,
+}: {
+  setSpinner: (arg0: boolean) => void
+}) => {
   const mode = useStore($mode)
   const boilerParts = useStore($boilerParts)
   const [categoryOption, setCategoryOption] = useState<SelectOptionType>(null)
@@ -65,6 +69,7 @@ const FilterSelect = () => {
     )
 
   const handleSortOptionChange = (selectedOption: SelectOptionType) => {
+    setSpinner(true)
     setCategoryOption(selectedOption)
 
     switch ((selectedOption as IOption).value) {
@@ -81,6 +86,8 @@ const FilterSelect = () => {
         updateRoteParam('popular')
         break
     }
+
+    setTimeout(() => setSpinner(false), 1000)
   }
 
   return (
@@ -90,7 +97,9 @@ const FilterSelect = () => {
       onChange={handleSortOptionChange}
       styles={{
         ...selectStyles,
-        control: (defaultStyles) => ({ ...controlStyles(defaultStyles, mode) }),
+        control: (defaultStyles) => ({
+          ...controlStyles(defaultStyles, mode),
+        }),
         input: (defaultStyles) => ({
           ...defaultStyles,
           color: mode === 'dark' ? '#f2f2f2' : '#222222',
