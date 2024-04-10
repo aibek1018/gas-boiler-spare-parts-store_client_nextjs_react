@@ -13,10 +13,12 @@ import {
   updatePartsManufacturer,
 } from '@/context/boilerParts'
 import { $mode } from '@/context/mode'
+import styles from '@/styles/catalog/index.module.scss'
 import { useStore } from 'effector-react'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import skeletonStyles from '@/styles/skeleton/index.module.scss'
 import CatalogItem from '@/components/modules/CatalogPage/CatalogItem'
 import ReactPaginate from 'react-paginate'
 import { IQueryParams } from '@/types/catalog'
@@ -26,8 +28,6 @@ import CatalogFilters from '@/components/modules/CatalogPage/CatalogFilters'
 import { usePopup } from '@/hooks/usePopup'
 import { checkQueryParams } from '@/utils/catalog'
 import FilterSvg from '@/components/elements/FilterSvg/FilterSvg'
-import styles from '@/styles/catalog/index.module.scss'
-import skeletonStyles from '@/styles/skeleton/index.module.scss'
 
 const CatalogPage = ({ query }: { query: IQueryParams }) => {
   const mode = useStore($mode)
